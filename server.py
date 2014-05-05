@@ -1,15 +1,23 @@
 from flask import *
-from subprocess import call
+from subprocess import Popen
+import os, signal
 app = Flask(__name__)
+
+def restart():
+	if app.config.has_key('pid'):
+		os.kill(app.config['pid'], signal.SIGTERM)
+	p = Popen("./runserver.sh")
+	app.config['pid'] = p.pid
 
 @app.route("/", methods=['POST', 'GET'])
 def receive():
 	if request.method == 'POST':
-		call(["./script.sh"], shell=True)
-		return True
+		restart()
+		return ""
 	else:
-		return "Hellos"
+		return "Hello"
 
 if __name__ == "__main__":
-	app.debug = True
+	# app.debug = True
+	restart()
 	app.run()
